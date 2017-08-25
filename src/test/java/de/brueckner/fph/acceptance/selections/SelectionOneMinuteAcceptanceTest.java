@@ -1,0 +1,50 @@
+package de.brueckner.fph.acceptance.selections;
+
+
+import de.brueckner.fph.acceptance.config.AbstractAcceptanceTest;
+import de.brueckner.fph.util.DateUtils;
+import de.brueckner.fph.util.LoginCredentials;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
+import static de.brueckner.fph.managers.TreeManager.TREE_DATEPICKER_TEXT_SELECTOR;
+import static de.brueckner.fph.util.DateUtils.*;
+
+public class SelectionOneMinuteAcceptanceTest extends AbstractAcceptanceTest {
+    private static final Logger logger = LoggerFactory.getLogger(SelectionOneMinuteAcceptanceTest.class);
+
+    @Test
+    public void selectionOneMinuteAcceptance() {
+        logger.info("selectionOneMinuteAcceptance");
+
+        applicationManager.loginPage(LoginCredentials.USER_DEV.getUsername(), LoginCredentials.USER_DEV.getPassword());
+
+        //select a period of one minute
+        timelineManager.setNewDateForDatePicker("2016-04-12 22:00:00", "2016-04-12 22:01:00");
+
+        //check breadcrum
+        breadcrumbManager.checkBreadcrumb(Arrays.asList("Frd", DateUtils.date("2016-04-12 22:00:00", DEFAULT_SHORT_DATE_FORMAT_DOUBLE_SPACE) + "  -  " + DateUtils.date("2016-04-12 22:01:00", DEFAULT_SHORT_DATE_FORMAT_DOUBLE_SPACE)));
+
+        //check period in content
+        contentManager.checkContentPeriod(DateUtils.date("2016-04-12 22:00:00", DEFAULT_SHORT_DATE_FORMAT), DateUtils.date("2016-04-12 22:01:00", DEFAULT_SHORT_DATE_FORMAT));
+
+        //time in tree
+        treeManager.openTree();
+        WebElement timeInTree = getWebDriver().findElement(By.cssSelector(TREE_DATEPICKER_TEXT_SELECTOR));
+        Assert.assertEquals(timeInTree.getText().trim(), DateUtils.date("2016-04-12 22:00:00", DEFAULT_LONG_DATE_SHORT_TIME_FORMAT) + "  -  " + DateUtils.date("2016-04-12 22:01:00", DEFAULT_LONG_DATE_SHORT_TIME_FORMAT));
+
+        //check tabs
+        contentManager.checkTabs("PRODUCTS\n" +
+                "EFFICIENCY\n" +
+                "ROLLS\n" +
+                "MATERIAL\n" +
+                "THICKNESS");
+
+    }
+}
